@@ -16,8 +16,12 @@ $.document = $(document);
     };
 
     var linkClicked = function(event) {
-        event.preventDefault();
-        History.pushState(null, document.title, this.getAttribute('href'));
+        var metaClick = event.metaKey || event.ctrlKey
+
+        if (!metaClick) {
+            event.preventDefault();
+            History.pushState(null, document.title, this.getAttribute('href'));
+        }
     };
 
     var formSubmited = function(event) {

@@ -8,9 +8,12 @@
   },
   "dependencies": {
     "baobab": "^1.1.0",
+    "binary-search-tree": "file:../../../../../../var/folders/k8/f42n2zx54yz7__6ngpz6c_w40000gn/T/npm-78919-dbd52bf6/git-cache-5b6445814dc4/07771c0a982a014c510f994c7208966ab9caa5db",
+    "btree": "^1.0.1",
     "csv-parse": "^0.1.1",
     "debug": "~0.7.4",
     "express": "~4.0.0",
+    "hashtable": "^1.0.3",
     "jade": "*",
     "lodash": "^3.8.0",
     "morgan": "~1.0.0",
@@ -18,6 +21,7 @@
     "prettysize": "0.0.3",
     "recluster": "^0.4.0",
     "socket.io": "^1.3.5",
+    "usage": "^0.7.0",
     "webworker": "^0.8.4",
     "webworker-threads": "^0.5.6"
   },

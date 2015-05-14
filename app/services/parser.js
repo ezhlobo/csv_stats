@@ -2,7 +2,8 @@ var _ = require('lodash');
 var fs = require('fs');
 var parse = require('csv-parse');
 var classify = require('./classifier');
-var Baobab = require('baobab');
+
+var PseudoHashTable = require('./pseudo_hash_table');
 
 var serialize = function(data) {
     var out = {
@@ -11,42 +12,45 @@ var serialize = function(data) {
         columns: []
     };
 
+    // Remove first row with columns headers
     var first_row = data[0];
     data = _.drop(data);
 
     out.columns_count = first_row.length;
     out.rows_count = data.length;
 
-    // Reverse
-    var columns = [];
+    // Prepare data
 
-    for (var i = 0; i < out.columns_count; i++) {
-        columns[i] = [];
-    }
+    var columns_hashtable = [];
 
-    for (var j = 0; j < out.rows_count; j++) {
-        var row = data[j];
+    _.times(out.columns_count, function(index) {
+        columns_hashtable[index] = new PseudoHashTable();
+    });
 
-        for (var i = 0; i < out.columns_count; i++) {
-            columns[i].push(row[i]);
-        }
-    }
-    // /Reverse
+    _.forEach(data, function(row, row_index) {
+        _.forEach(row, function(column, column_index) {
+            var current = columns_hashtable[column_index].get(column) || 0;
 
-    for (var i = 0; i < out.columns_count; i++) {
-        var column = columns[i];
-        var uniq = _.uniq(column);
-        var filled = _.without(column, '');
+            columns_hashtable[column_index].put(column, 1);
+        });
+    });
 
-        var item = {
-            filled: Math.round((filled.length / column.length) * 100),
-            unique: uniq.length,
-            type: classify(uniq),
-            name: first_row[i],
+    // Populate columns
+
+    _.times(out.columns_count, function(index) {
+        var table = columns_hashtable[index];
+        var table_size = table.size();
+        var table_keys = table.keys();
+        var table_emptied = table.get('') || 0;
+        var column = {
+            filled: Math.round((1 - (table_emptied / table_size)) * 100),
+            unique: table_size,
+            type: classify(table_keys),
+            name: first_row[index]
         };
 
-        out.columns.push(item);
-    }
+        out.columns.push(column);
+    });
 
     return out;
 };
@@ -57,12 +61,10 @@ var delimiter = function(text) {
     return first_line.replace(/"[^"]*"/g, '1').match(/^[\w\s".]+(.).+/)[1];
 };
 
-module.exports = function(file, next) {
+module.exports = function(file, parsed, done) {
     var result = {};
     var file_path = __dirname.replace(/app\/services$/, '') + file.path;
     var content = fs.readFileSync(file_path, 'utf8');
-
-    console.log(delimiter(content));
 
     var parsing = parse(content, {delimiter: delimiter(content)}, function(err, data) {
         if (err) {
@@ -70,9 +72,12 @@ module.exports = function(file, next) {
 
         } else {
             result.original = data;
+
+            parsed(result);
+
             result.serialized = serialize(data);
 
-            next(result);
+            done(result);
         }
     });
 };

@@ -4,14 +4,14 @@ block content
   .page-header
     h1 File name: «#{file.originalname}»
 
-  if !file.parsed_at
+  if !file.processed_at
     .lead#time_area(data-created-at=file.created_at)
       strong
         span [
         span 00:00:000
         span ]
 
-      span  Loading...
+      span  Parsing...
 
     #parsed_area
 
@@ -19,26 +19,30 @@ block content
       (function() {
         var $area = $('#time_area');
         var createdAt = parseInt($area.data('created-at'));
+        var status_message = 'Parsing...';
 
         var updateTime = function() {
           var diff = moment(moment().diff(createdAt)).format('mm:ss:SSS')
 
-          $area.html('<strong>[' + diff + ']</strong> <span>Loading...</span>');
+          $area.html('<strong>[' + diff + ']</strong> <span>' + status_message + '</span>');
         };
 
         var timer = setInterval(updateTime, 5);
 
         socket = io.connect('http://localhost:3535/#{file.name}');
-        socket.on('parsed', function (data) {
+        socket.on('parsed', function() {
+          status_message = 'Parsed! Processing...';
+        });
+        socket.on('done', function (data) {
           clearInterval(timer);
-          $area.find('> span').html(' Loaded')
+          $area.find('> span').html(' Done')
           $('#parsed_area').html(data.table);
         });
       })();
 
   else
     .lead
-      span Loaded
+      span Done
 
     #parsed_area
       != table
