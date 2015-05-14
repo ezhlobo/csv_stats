@@ -1,0 +1,37 @@
+table.table.table-bordered
+  thead
+    tr
+      th
+
+      th Имя колонки
+
+      th Заполненность колонки непустыми значениями
+
+      th Кол-во уникальных значений
+
+      th Тип
+
+  tbody
+    if table
+      if table.columns
+        each column, index in table.columns
+          tr
+            td
+              = index + 1
+
+            td
+              = column.name
+
+            td
+              = column.filled
+              | %
+
+            td
+              = column.unique
+
+            td
+              = column.type
+
+  tfoot
+    tr
+      td(colspan="5") Общая информация о файле: колонок — <strong>#{table.columns_count}</strong>, рядов — <strong>#{table.rows_count}</strong>

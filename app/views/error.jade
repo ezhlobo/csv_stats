@@ -1,0 +1,13 @@
+extends layout
+
+block content
+  .page-header
+    h1
+      = message
+
+  .lead
+    h2
+      = error.status
+
+    pre
+      = error.stack

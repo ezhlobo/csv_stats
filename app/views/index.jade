@@ -1,0 +1,13 @@
+extends layout
+
+block content
+  .page-header
+    h1 Parse csv file
+
+  p.lead You should insert <code>.CSV</code> here
+
+  form(enctype="multipart/form-data" action="/files" method="POST" remote)
+    .form-group
+      input.well(type="file" name="file")
+
+    button.btn.btn-default(type="submit") Parse

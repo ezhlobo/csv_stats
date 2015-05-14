@@ -1,0 +1,17 @@
+extends ../layout
+
+block content
+  .page-header
+    h1 List of parsed files
+
+  .lead Filter will be here
+
+  if files
+    ol
+      each file, file_name in files
+        li
+          a(href="/files/#{file_name}" remote)
+            = file.originalname
+
+  else
+    a(href="/" remote) Upload new file
