@@ -8,8 +8,6 @@ var delimiter = function(text) {
 };
 
 module.exports = function(file, callback) {
-    console.log(file.size);
-
     var result = {};
     var file_path = __dirname.replace(/app\/services$/, '') + file.path;
     var content = fs.readFileSync(file_path, 'utf8');

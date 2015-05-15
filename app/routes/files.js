@@ -40,8 +40,6 @@ router.post('/', function(req, res) {
         };
 
         cllb.done = function(result) {
-            console.log('done');
-
             storage[file.name].processed = result;
             storage[file.name].processed_at = new Date().getTime();
 

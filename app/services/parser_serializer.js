@@ -18,37 +18,38 @@ var serialize = function(data) {
     out.columns_count = first_row.length;
     out.rows_count = data.length;
 
-    // Prepare data
-
     var columns_hashtable = [];
+    var columns_emptied = _.range(0, out.columns_count, 0);
 
-    _.times(out.columns_count, function(index) {
-        columns_hashtable[index] = new Hashtable();
-    });
+    var output = function(column_index) {
+        var table_size = data.length;
+        var table_keys = columns_hashtable[column_index].keys();
+        var table_emptied = columns_emptied[column_index];
 
-    _.forEach(data, function(row, row_index) {
-        _.forEach(row, function(column, column_index) {
-            var current = columns_hashtable[column_index].get(column) || 0;
-
-            columns_hashtable[column_index].put(column, 1);
-        });
-    });
-
-    // Populate columns
-
-    _.times(out.columns_count, function(index) {
-        var table = columns_hashtable[index];
-        var table_size = table.size();
-        var table_keys = table.keys();
-        var table_emptied = table.get('') || 0;
-        var column = {
+        out.columns.push({
             filled: Math.round((1 - (table_emptied / table_size)) * 100),
             unique: table_size,
             type: classify(table_keys),
-            name: first_row[index]
-        };
+            name: first_row[column_index]
+        });
+    };
 
-        out.columns.push(column);
+    _.forEach(data, function(row, row_index) {
+        _.forEach(row, function(column, column_index) {
+            if (row_index == 0) {
+                columns_hashtable.push(new Hashtable());
+            }
+
+            if (!column) {
+                columns_emptied[column_index]++;
+            }
+
+            columns_hashtable[column_index].put(column, 1);
+
+            if (row_index == data.length - 1) {
+                output(column_index);
+            }
+        });
     });
 
     return out;
