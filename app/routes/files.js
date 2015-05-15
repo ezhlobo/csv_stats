@@ -52,9 +52,10 @@ router.post('/', function(req, res) {
 });
 
 router.get('/:name', function(req, res) {
+    console.log(storage);
     var file = storage[req.params.name];
 
-    var view = jade.compileFile('./app/views/shared/table.jade', {})({table: file.parsed ? file.parsed.serialized : {}});
+    var view = jade.compileFile('./app/views/shared/table.jade', {})({table: file.processed ? file.processed.serialized : {}});
 
     res.render('files/show', {file: file, table: view})
 })

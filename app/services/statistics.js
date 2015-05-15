@@ -3,8 +3,8 @@ var _ = require('lodash');
 var stats = {};
 
 stats.opts = {
-    interval: 1000,
-    count: 50
+    interval: 1500,
+    count: 100
 };
 
 stats.data = {

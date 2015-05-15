@@ -6,57 +6,85 @@ block content
 
   //- .lead Filter will be here
 
-  canvas#memory_usage(width="1000" height="400")
+  #memory_usage(style="width: 100%; height: 300px;")
 
   script.
-    var charts = {};
+    var data = [];
 
-    console.log(Chart)
-    Chart.defaults.global.responsive = true;
+    _.forEach([#{stats.data.__memory}], function(item, index) {
+      data.push({
+        step: index,
+        memory: item,
+        loaded: [#{stats.data.__loaded}][index]
+      });
+    });
 
-    charts.memory_usage = {};
-
-    charts.memory_usage.canvas_ctx = document.getElementById("memory_usage").getContext("2d");
-    charts.memory_usage.root = new Chart(charts.memory_usage.canvas_ctx);
-
-    charts.memory_usage.data = {
-      labels: _.range(#{stats.opts.count}),
-      datasets: [
-        {
-          label: "My First dataset",
-          fillColor: "rgba(220,220,220,0.2)",
-          strokeColor: "rgba(220,220,220,1)",
-          pointColor: "rgba(220,220,220,1)",
-          pointStrokeColor: "#fff",
-          pointHighlightFill: "#fff",
-          pointHighlightStroke: "rgba(220,220,220,1)",
-          data: [#{stats.data.__memory}]
+    var chart = AmCharts.makeChart("memory_usage", {
+        "type": "serial",
+        "theme": "light",
+        "autoMarginOffset":0,
+        "path": "http://www.amcharts.com/lib/3/",
+        "dataProvider": data,
+        "legend": {
+            "useGraphSettings": true,
+            "valueText": ""
         },
-        {
-          label: "My Second dataset",
-          fillColor: "rgba(151,187,205,0.2)",
-          strokeColor: "rgba(151,187,205,1)",
-          pointColor: "rgba(151,187,205,1)",
-          pointStrokeColor: "#fff",
-          pointHighlightFill: "#fff",
-          pointHighlightStroke: "rgba(151,187,205,1)",
-          data: [#{stats.data.__loaded}]
+        "valueAxes": [{
+            "axisAlpha": 0,
+            "position": "right",
+            labelFunction: function(value, valueText, valueAxis) {
+              return window.humanFileSize(value);
+            }
+        }],
+        "graphs": [{
+            "id":"g1",
+            "title": "Memory",
+            "type": "step",
+            "bullet":"square",
+            "bulletAlpha":0,
+            "bulletSize":4,
+            "bulletBorderAlpha":0,
+            "valueField": "memory",
+            balloonFunction: function(item) {
+              return window.humanFileSize(item.values.value);
+            }
+        }, {
+            "id":"g2",
+            "title": "Loaded",
+            "type": "step",
+            "bullet":"square",
+            "bulletAlpha":0,
+            "bulletSize":4,
+            "bulletBorderAlpha":0,
+            "valueField": "loaded",
+            balloonFunction: function(item) {
+              return window.humanFileSize(item.values.value);
+            }
+        }],
+        "chartCursor": {
+            "fullWidth":true,
+            "cursorAlpha": 0.05,
+            "graphBulletAlpha":1
+        },
+        "categoryField": "step",
+        "categoryAxis": {
+            "minPeriod": "YYYY",
+            "parseDates": false,
+            "gridAlpha": 0
         }
-      ]
-    };
-
-    charts.memory_usage.options = {};
-
-    charts.memory_usage.chart = charts.memory_usage.root.Line(charts.memory_usage.data, charts.memory_usage.options);
+    });
 
     socket = io.connect('http://localhost:3535/memory_usage');
 
     socket.on('update', function(data) {
-      _.forEach(charts.memory_usage.chart.datasets[0].points, function(point, index) {
-        charts.memory_usage.chart.datasets[0].points[index].value = data.stats.data.__memory[index];
+      var memory = data.stats.data.__memory;
+      var loaded = data.stats.data.__loaded;
+
+      chart.dataProvider.push({
+        step: chart.dataProvider.length,
+        memory: memory[memory.length - 1],
+        loaded: loaded[loaded.length - 1]
       });
-      _.forEach(charts.memory_usage.chart.datasets[1].points, function(point, index) {
-        charts.memory_usage.chart.datasets[1].points[index].value = data.stats.data.__loaded[index];
-      });
-      charts.memory_usage.chart.update();
+
+      chart.validateData();
     });
