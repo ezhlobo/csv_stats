@@ -2,8 +2,6 @@ var _ = require('lodash');
 var fs = require('fs');
 var classify = require('./classifier');
 
-var Hashtable = require("jshashtable");
-
 var serialize = function(data) {
     var out = {
         columns_count: 0,
@@ -23,7 +21,7 @@ var serialize = function(data) {
 
     var output = function(column_index) {
         var table_size = data.length;
-        var table_keys = columns_hashtable[column_index].keys();
+        var table_keys = Object.keys(columns_hashtable[column_index]);
         var table_emptied = columns_emptied[column_index];
 
         out.columns.push({
@@ -37,14 +35,14 @@ var serialize = function(data) {
     _.forEach(data, function(row, row_index) {
         _.forEach(row, function(column, column_index) {
             if (row_index == 0) {
-                columns_hashtable.push(new Hashtable());
+                columns_hashtable.push({});
             }
 
             if (!column) {
                 columns_emptied[column_index]++;
             }
 
-            columns_hashtable[column_index].put(column, 1);
+            columns_hashtable[column_index][column] = 1;
 
             if (row_index == data.length - 1) {
                 output(column_index);
