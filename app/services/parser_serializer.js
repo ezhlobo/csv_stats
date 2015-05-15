@@ -1,9 +1,8 @@
 var _ = require('lodash');
 var fs = require('fs');
-var parse = require('csv-parse');
 var classify = require('./classifier');
 
-var PseudoHashTable = require('./pseudo_hash_table');
+var Hashtable = require("jshashtable");
 
 var serialize = function(data) {
     var out = {
@@ -24,7 +23,7 @@ var serialize = function(data) {
     var columns_hashtable = [];
 
     _.times(out.columns_count, function(index) {
-        columns_hashtable[index] = new PseudoHashTable();
+        columns_hashtable[index] = new Hashtable();
     });
 
     _.forEach(data, function(row, row_index) {
@@ -55,29 +54,12 @@ var serialize = function(data) {
     return out;
 };
 
-var delimiter = function(text) {
-    var first_line = text.match(/^([^\n]*)\n.*/, '$1')[1];
-
-    return first_line.replace(/"[^"]*"/g, '1').match(/^[\w\s".]+(.).+/)[1];
-};
-
-module.exports = function(file, parsed, done) {
+module.exports = function(data, callback) {
     var result = {};
-    var file_path = __dirname.replace(/app\/services$/, '') + file.path;
-    var content = fs.readFileSync(file_path, 'utf8');
 
-    var parsing = parse(content, {delimiter: delimiter(content)}, function(err, data) {
-        if (err) {
-            console.log(err);
+    result.original = data;
 
-        } else {
-            result.original = data;
+    result.serialized = serialize(data);
 
-            parsed(result);
-
-            result.serialized = serialize(data);
-
-            done(result);
-        }
-    });
+    callback(result);
 };

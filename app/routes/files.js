@@ -1,9 +1,16 @@
 var fs = require('fs');
 var express = require('express');
 var router = express.Router();
-var parse = require('./../services/parser');
 var stats = require('./../services/statistics');
 var jade = require('jade');
+
+var options = {
+    maxConcurrentCallsPerWorker: 10,
+    autoStart: true
+};
+var workerFarm = require('worker-farm');
+var parser_csv = workerFarm(options, require.resolve('./../services/parser_csv'));
+var parser_serializer = workerFarm(options, require.resolve('./../services/parser_serializer'));
 
 var storage = {};
 
@@ -24,13 +31,17 @@ router.post('/', function(req, res) {
     var socket_file = io.of('/' + file.name);
 
     socket_file.on('connection', function(socket) {
-        var cllb_parsed = function(result) {
+        var cllb = {};
+
+        cllb.parsed = function(result) {
             storage[file.name].parsed_at = new Date().getTime();
 
             socket_file.emit('parsed');
         };
 
-        var cllb_done = function(result) {
+        cllb.done = function(result) {
+            console.log('done');
+
             storage[file.name].processed = result;
             storage[file.name].processed_at = new Date().getTime();
 
@@ -41,7 +52,13 @@ router.post('/', function(req, res) {
             socket_file.emit('done', {table: view});
         };
 
-        parse(file, cllb_parsed, cllb_done);
+        parser_csv(file, function(result) {
+            cllb.parsed(result);
+
+            parser_serializer(result, function(result) {
+                cllb.done(result);
+            });
+        });
     });
 
     var redirect_url = '/files/' + file.name;
