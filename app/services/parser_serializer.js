@@ -26,7 +26,7 @@ var serialize = function(data) {
 
         out.columns.push({
             filled: Math.round((1 - (table_emptied / table_size)) * 100),
-            unique: table_size,
+            unique: table_keys.length,
             type: classify(table_keys),
             name: first_row[column_index]
         });
