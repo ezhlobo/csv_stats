@@ -1,16 +1,10 @@
 var fs = require('fs');
+var path = require('path');
+var child_process = require('child_process');
 var express = require('express');
 var router = express.Router();
 var stats = require('./../services/statistics');
 var jade = require('jade');
-
-var options = {
-    maxConcurrentCallsPerWorker: 10,
-    autoStart: true
-};
-var workerFarm = require('worker-farm');
-var parser_csv = workerFarm(options, require.resolve('./../services/parser_csv'));
-var parser_serializer = workerFarm(options, require.resolve('./../services/parser_serializer'));
 
 var storage = {};
 
@@ -29,6 +23,8 @@ router.post('/', function(req, res) {
     stats.data.loaded_data = stats.data.loaded_data + file.size;
 
     var socket_file = io.of('/' + file.name);
+
+    var parser = child_process.fork(path.join(__dirname, '../services/parser'));
 
     socket_file.on('connection', function(socket) {
         var cllb = {};
@@ -50,13 +46,19 @@ router.post('/', function(req, res) {
             socket_file.emit('done', {table: view});
         };
 
-        parser_csv(file, function(result) {
-            cllb.parsed(result);
+        parser.on('message', function(data) {
+            cllb[data.type](data.result);
 
-            parser_serializer(result, function(result) {
-                cllb.done(result);
-            });
+            if (data.type === 'done') {
+                console.log(parser);
+                parser.kill('SIGKILL');
+                console.log(parser);
+            }
         });
+
+        if (!parser.killed) {
+            parser.send(file);
+        }
     });
 
     var redirect_url = '/files/' + file.name;

@@ -56,8 +56,6 @@ var serialize = function(data) {
 module.exports = function(data, callback) {
     var result = {};
 
-    result.original = data;
-
     result.serialized = serialize(data);
 
     callback(result);
