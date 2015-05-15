@@ -41,7 +41,7 @@ router.post('/', function(req, res) {
 
             stats.data.time_per_byte = ((storage[file.name].processed_at - storage[file.name].created_at) * 1024 / storage[file.name].size).toFixed(2);
 
-            var view = jade.compileFile('./app/views/shared/table.jade', {})({table: result.serialized});
+            var view = jade.compileFile('./app/views/shared/table.jade', {})({table: result});
 
             socket_file.emit('done', {table: view});
         };
@@ -50,9 +50,7 @@ router.post('/', function(req, res) {
             cllb[data.type](data.result);
 
             if (data.type === 'done') {
-                console.log(parser);
                 parser.kill('SIGKILL');
-                console.log(parser);
             }
         });
 
