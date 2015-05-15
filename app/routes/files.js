@@ -34,6 +34,8 @@ router.post('/', function(req, res) {
             storage[file.name].processed = result;
             storage[file.name].processed_at = new Date().getTime();
 
+            stats.data.time_per_byte = ((storage[file.name].processed_at - storage[file.name].created_at) * 1024 / storage[file.name].size).toFixed(2);
+
             var view = jade.compileFile('./app/views/shared/table.jade', {})({table: result.serialized});
 
             socket_file.emit('done', {table: view});
@@ -52,7 +54,6 @@ router.post('/', function(req, res) {
 });
 
 router.get('/:name', function(req, res) {
-    console.log(storage);
     var file = storage[req.params.name];
 
     var view = jade.compileFile('./app/views/shared/table.jade', {})({table: file.processed ? file.processed.serialized : {}});

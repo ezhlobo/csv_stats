@@ -8,12 +8,15 @@ stats.opts = {
 };
 
 stats.data = {
-    __memory: _.range(stats.opts.count),
-    __loaded: _.range(stats.opts.count),
-    loaded_data: 0
+    __memory: _.range(0, stats.opts.count-1, 0),
+    __loaded: _.range(0, stats.opts.count-1, 0),
+    __tpm: _.range(0, stats.opts.count-1, 0),
+    loaded_data: 0,
+    time_per_byte: 0
 };
 
-var socket = io.of('/memory_usage');
+var socket_memory = io.of('/memory_usage');
+var socket_time = io.of('/time');
 
 stats.start = function() {
     stats._timer = setInterval(function() {
@@ -24,7 +27,11 @@ stats.start = function() {
         stats.data.__loaded = _.drop(stats.data.__loaded);
         stats.data.__loaded.push(stats.data.loaded_data);
 
-        socket.emit('update', {stats: stats});
+        stats.data.__tpm = _.drop(stats.data.__tpm);
+        stats.data.__tpm.push(stats.data.time_per_byte);
+
+        socket_memory.emit('update', {stats: stats});
+        socket_time.emit('update', {stats: stats});
 
     }, stats.opts.interval);
 };
