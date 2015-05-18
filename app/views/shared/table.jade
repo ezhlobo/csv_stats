@@ -1,18 +1,18 @@
-table.table.table-bordered
-  thead
-    tr
-      th
+if table
+  table.table.table-bordered
+    thead
+      tr
+        th
 
-      th Имя колонки
+        th Имя колонки
 
-      th Заполненность колонки непустыми значениями
+        th Заполненность колонки непустыми значениями
 
-      th Кол-во уникальных значений
+        th Кол-во уникальных значений
 
-      th Тип
+        th Тип
 
-  tbody
-    if table
+    tbody
       if table.columns
         each column, index in table.columns
           tr
@@ -32,6 +32,6 @@ table.table.table-bordered
             td
               = column.type
 
-  tfoot
-    tr
-      td(colspan="5") Общая информация о файле: колонок — <strong>#{table.columns_count}</strong>, рядов — <strong>#{table.rows_count}</strong>
+    tfoot
+      tr
+        td(colspan="5") Общая информация о файле: колонок — <strong>#{table.columns_count}</strong>, рядов — <strong>#{table.rows_count}</strong>

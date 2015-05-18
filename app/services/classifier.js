@@ -18,7 +18,7 @@ var types = [{
 }, {
     title: titles.time,
     test: function(value) {
-        return value && 'Invalid Date' != new Date('11.08.2015 ' + value)
+        return value && 'Invalid Date' != new Date('11.08.2015 ' + value);
     }
 }];
 

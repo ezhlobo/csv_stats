@@ -15,6 +15,8 @@ router.get('/', function(req, res) {
 
 // POST `/files`
 router.post('/', function(req, res) {
+    // @TODO: Need to create service: create_file
+
     var file = req.files.file;
 
     storage[file.name] = file;
@@ -39,9 +41,6 @@ router.post('/', function(req, res) {
             storage[file.name].processed = result;
             storage[file.name].processed_at = new Date().getTime();
 
-            console.log(storage[file.name].created_at);
-            console.log(storage[file.name].start_parsing_at);
-            console.log(storage[file.name].start_parsing_at - storage[file.name].created_at);
             stats.data.time_per_byte = ((storage[file.name].processed_at - storage[file.name].start_parsing_at) * 1024 / storage[file.name].size).toFixed(2);
 
             var view = jade.compileFile('./app/views/shared/table.jade', {})({table: result});
@@ -75,7 +74,7 @@ router.post('/', function(req, res) {
 router.get('/:name', function(req, res) {
     var file = storage[req.params.name];
 
-    var view = jade.compileFile('./app/views/shared/table.jade', {})({table: file.processed ? file.processed.serialized : {}});
+    var view = jade.compileFile('./app/views/shared/table.jade', {})({table: file.processed ? file.processed : null});
 
     res.render('files/show', {file: file, table: view})
 })

@@ -4,7 +4,7 @@ io = require('socket.io')((process.env.PORT || 3000) + 535);
 var express = require('express');
 var path = require('path');
 var logger = require('morgan');
-var multer  = require('multer')
+var multer  = require('multer');
 var stats = require('./app/services/statistics');
 
 var app = express();
