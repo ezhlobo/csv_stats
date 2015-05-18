@@ -18,7 +18,7 @@ router.post('/', function(req, res) {
     var file = req.files.file;
 
     storage[file.name] = file;
-    storage[file.name].created_at = new Date().getTime()
+    storage[file.name].created_at = new Date().getTime();
 
     stats.data.loaded_data = stats.data.loaded_data + file.size;
 
@@ -39,7 +39,10 @@ router.post('/', function(req, res) {
             storage[file.name].processed = result;
             storage[file.name].processed_at = new Date().getTime();
 
-            stats.data.time_per_byte = ((storage[file.name].processed_at - storage[file.name].created_at) * 1024 / storage[file.name].size).toFixed(2);
+            console.log(storage[file.name].created_at);
+            console.log(storage[file.name].start_parsing_at);
+            console.log(storage[file.name].start_parsing_at - storage[file.name].created_at);
+            stats.data.time_per_byte = ((storage[file.name].processed_at - storage[file.name].start_parsing_at) * 1024 / storage[file.name].size).toFixed(2);
 
             var view = jade.compileFile('./app/views/shared/table.jade', {})({table: result});
 
@@ -55,6 +58,7 @@ router.post('/', function(req, res) {
         });
 
         if (!parser.killed) {
+            storage[file.name].start_parsing_at = new Date().getTime();
             parser.send(file);
         }
     });

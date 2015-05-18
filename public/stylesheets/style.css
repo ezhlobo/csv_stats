@@ -5,3 +5,9 @@ body > #container {
 code {
     font-size: 80%;
     }
+
+input.well {
+    border-style: dashed;
+    border-width: 2px;
+    box-shadow: none;
+    }

@@ -11,6 +11,8 @@ block content
   #time(style="width: 100%; height: 250px;")
 
   script.
+
+  script.
     (function() {
       var data = [];
 
@@ -71,14 +73,20 @@ block content
       socket_memory = io.connect('http://localhost:3535/memory_usage');
 
       socket_memory.on('update', function(data) {
-        var memory = data.stats.data.__memory;
-        var loaded = data.stats.data.__loaded;
+        var memory = data.stats.__memory;
+        var loaded = data.stats.__loaded;
 
-        chart.dataProvider.push({
-          step: chart.dataProvider.length,
-          memory: memory[memory.length - 1],
-          loaded: loaded[loaded.length - 1]
+        var data = [];
+
+        _.forEach(memory, function(item, index) {
+          data.push({
+            step: index,
+            memory: item,
+            loaded: loaded[index]
+          });
         });
+
+        chart.dataProvider = data;
 
         chart.validateData();
       });
@@ -126,12 +134,18 @@ block content
       socket_time = io.connect('http://localhost:3535/time');
 
       socket_time.on('update', function(data) {
-        var time = data.stats.data.__tpm;
+        var time = data.stats.__tpm;
 
-        chart.dataProvider.push({
-          step: chart.dataProvider.length,
-          value: time[time.length - 1]
+        var data = [];
+
+        _.forEach(time, function(item, index) {
+          data.push({
+            step: index,
+            value: item,
+          });
         });
+
+        chart.dataProvider = data;
 
         chart.validateData();
       });
