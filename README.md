@@ -1,5 +1,9 @@
 # Parse CSV files, task for taucraft
 
+## Format
+
+Delimiter between columns may be comma (`,`) or semi-colons (`;`). Determined automatically.
+
 ## Development
 
 To start server:
