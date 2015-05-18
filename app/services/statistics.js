@@ -28,15 +28,15 @@ function parsePS(pid, output) {
 
 var stats = {};
 
-stats.opts = {
+var stats_opts = {
     interval: 1000,
     count: 100
 };
 
 stats.data = {
-    __memory: _.range(0, stats.opts.count, 0),
-    __loaded: _.range(0, stats.opts.count, 0),
-    __tpm: _.range(0, stats.opts.count, 0),
+    __memory: _.range(0, stats_opts.count, 0),
+    __loaded: _.range(0, stats_opts.count, 0),
+    __tpm: _.range(0, stats_opts.count, 0),
     loaded_data: 0,
     time_per_byte: 0
 };
@@ -74,12 +74,17 @@ stats.start = function() {
             stats.data.__tpm = _.drop(stats.data.__tpm);
             stats.data.__tpm.push(stats.data.time_per_byte);
 
-            socket_memory.emit('update', {stats: stats.data});
-            socket_time.emit('update', {stats: stats.data});
+            socket_memory.emit('update', {
+                stats: stats.data
+            });
+
+            socket_time.emit('update', {
+                stats: stats.data
+            });
         });
 
 
-    }, stats.opts.interval);
+    }, stats_opts.interval);
 };
 
 module.exports = stats;

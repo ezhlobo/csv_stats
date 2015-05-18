@@ -1,6 +1,7 @@
 var _ = require('lodash');
+var path = require('path');
 var fs = require('fs');
-var classify = require('./classifier');
+var classify = require(path.resolve('app', 'services', 'classifier'));
 
 var serialize = function(data) {
     var out = {
